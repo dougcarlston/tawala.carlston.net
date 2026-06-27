@@ -592,7 +592,7 @@ if(window.projectId){
   showOverlay();
   fetch(RUNTIME,{
     method:"POST",headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({action:"submitForm",projectId:window.projectId,linkId:window.linkId,formName:"",fields:{}})
+    body:JSON.stringify({action:"getForm",projectId:window.projectId,linkId:window.linkId})
   }).then(function(r){return r.json();}).then(function(data){
     hideOverlay();
     if(data.projectName){
