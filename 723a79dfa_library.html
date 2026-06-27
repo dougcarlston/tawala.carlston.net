@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Tawala Library</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;}
+body{font-family:Georgia,serif;font-size:14px;background:#365373;color:#3c3c3c;margin:0;padding:24px 32px;}
+#outerContainer{text-align:center;width:100%;}
+#main{background:#f5f4ed;margin:0 auto;display:inline-block;min-width:340px;max-width:760px;width:100%;text-align:left;}
+h1.pageHeading{background:#f5f4ed;color:#7b4500;font-size:26px;font-weight:bold;padding:22px 28px;border-bottom:2px solid #ddd;margin:0;}
+.subtitle{padding:10px 28px 0;font-size:13px;color:#666;font-style:italic;}
+.projectList{padding:20px 28px 28px;}
+.projectCard{border:1px solid #d4c9b8;border-radius:4px;background:#fff;margin-bottom:16px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.projectCard:hover{background:#fdf8f2;border-color:#7B4500;}
+.cardInfo{flex:1;}
+.cardName{font-size:16px;font-weight:bold;color:#3c3c3c;margin-bottom:4px;}
+.cardDesc{font-size:12px;color:#777;line-height:1.5;}
+.launchBtn{background:#7B4500;color:#fff;border:none;padding:.45em 1.4em;font-size:13px;font-family:inherit;border-radius:4px;cursor:pointer;font-weight:bold;white-space:nowrap;text-decoration:none;display:inline-block;}
+.launchBtn:hover{opacity:.85;}
+#innerTawalaFooter{background:#7B4500;height:36px;width:100%;display:flex;align-items:center;justify-content:flex-end;padding-right:16px;}
+#innerTawalaFooter span{color:#fff;font-size:11px;opacity:.8;}
+</style>
+</head>
+<body>
+<div id="outerContainer"><div id="main">
+  <h1 class="pageHeading">Tawala Library</h1>
+  <p class="subtitle">Select a project to open it.</p>
+  <div class="projectList" id="projectList">
+    <div style="padding:1em;color:#888;font-style:italic">Loading projects…</div>
+  </div>
+  <div id="innerTawalaFooter"><span>Powered by Tawala</span></div>
+</div></div>
+
+<script>
+var RUNTIME = "https://superagent-3398ca67.base44.app/functions/tawalaRuntime";
+
+// Curated project list — add entries here as new projects go live
+var PROJECTS = [
+  {
+    id: "6a39cbf1659f3159bbde57a0",
+    name: "Signup Sheet",
+    desc: "Collect names, emails, phone numbers and addresses from a group."
+  },
+  {
+    id: "6a39cbf1659f3159bbde57a1",
+    name: "Simple Survey",
+    desc: "A single multiple-choice poll question with a live results report."
+  },
+  {
+    id: "6a39cbf1659f3159bbde5798",
+    name: "Get Together",
+    desc: "Find the best date for a group event — respondents pick all dates that work."
+  },
+  {
+    id: "6a34733123a041ce92083424",
+    name: "DirtBowl Registration",
+    desc: "MVSC DirtBowl girls soccer registration form."
+  }
+];
+
+function render() {
+  var list = document.getElementById("projectList");
+  if (!PROJECTS.length) {
+    list.innerHTML = '<div style="color:#888;font-style:italic">No projects available.</div>';
+    return;
+  }
+  list.innerHTML = PROJECTS.map(function(p) {
+    return '<div class="projectCard">'
+      + '<div class="cardInfo">'
+      + '<div class="cardName">' + escH(p.name) + '</div>'
+      + '<div class="cardDesc">' + escH(p.desc) + '</div>'
+      + '</div>'
+      + '<a class="launchBtn" href="runner.html?p=' + encodeURIComponent(p.id) + '">Open &rarr;</a>'
+      + '</div>';
+  }).join("");
+}
+
+function escH(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+render();
+</script>
+</body></html>

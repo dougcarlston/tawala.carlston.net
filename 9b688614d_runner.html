@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Tawala</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;}
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,textarea,p,blockquote,th,td{margin:0;padding:0;}
+table{border-collapse:collapse;border-spacing:0;}
+h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}
+
+/* ── Base layout ── */
+body{font-family:Georgia,serif;font-size:13px;background:#365373;color:#3c3c3c;margin:16px 32px;line-height:1.4;}
+#outerContainer{text-align:center;width:100%;}
+#tawalaProjectContainer{background:#f5f4ed;margin:0 auto;display:inline-block;min-width:340px;max-width:950px;width:100%;text-align:left;}
+h1.pageHeading{background:#f5f4ed;color:#7b4500;font-size:26px;font-weight:bold;padding:22px 28px;min-height:64px;display:flex;align-items:center;}
+form{padding:1.2em 2.5em 2em;}
+#innerTawalaFooter{background:#7B4500;height:36px;width:100%;margin-top:2em;display:flex;align-items:center;justify-content:flex-end;padding-right:16px;}
+#innerTawalaFooter span{color:#fff;font-size:11px;opacity:.8;}
+#innerTawalaFooter a{color:#ffd08a;font-size:11px;text-decoration:none;margin-left:12px;}
+#innerTawalaFooter a:hover{text-decoration:underline;}
+
+/* ── Text items ── */
+div.text,h2.text,h3.text{padding-bottom:1em;}
+h2.text.heading{font-size:20px;font-weight:bold;color:#7B4500;border-bottom:2px solid #7B4500;padding-bottom:.3em;margin:.5em 0 .7em;}
+h3.text.subheading{font-size:14px;font-weight:bold;color:#7B4500;margin:.4em 0 .6em;}
+div.text.normal{font-size:13px;}
+div.text.instructional{color:#3a4ea0;font-style:italic;background:#eef0ff;border-left:5px solid #7b8fe0;padding:.6em 1em;margin:.6em 0 1em;border-radius:3px;}
+div.textItem{padding-bottom:1.2em;}
+
+/* ── FIB ── */
+table.fib{border-collapse:collapse;margin-bottom:.3em;}
+table.fib tr td{padding-bottom:.35em;padding-right:.6em;vertical-align:middle;}
+table.fib tr td.label{min-width:120px;max-width:200px;padding-right:1em;font-size:13px;text-align:left;}
+input.text,textarea{font-family:inherit;font-size:100%;border:1px solid #7B4500;padding:.25em .4em;border-radius:2px;background:#fffff8;}
+input.text.small{width:6em;}input.text.medium{width:18em;}input.text.large{width:38em;}
+
+/* ── MC ── */
+div.mcRadio,div.mcCheckbox{padding-bottom:1.2em;}
+div.mcRadio label.question,div.mcCheckbox label.question{display:block;font-weight:bold;padding-bottom:.4em;padding-top:.3em;}
+div.mcRadio span.answer,div.mcCheckbox span.answer{display:block;padding-bottom:.4em;}
+div.mcRadio span.answer input,div.mcCheckbox span.answer input{margin-right:.4em;vertical-align:middle;cursor:pointer;accent-color:#7B4500;}
+div.mcRadio span.answer label,div.mcCheckbox span.answer label{vertical-align:middle;cursor:pointer;}
+
+/* ── Submit / errors ── */
+#errormsg{border:1px solid #c00;padding:8px 12px;color:#880000;text-align:center;margin:0 2.5em 12px;font-weight:bold;border-radius:3px;background:#fff8f8;display:none;}
+#errormsg.show{display:block;}
+.submitRow{margin-top:1.5em;padding-top:1em;border-top:1px solid #ccc;text-align:right;}
+button.submit{background:#7B4500;color:#fff;border:none;padding:.5em 2em;font-size:14px;font-family:inherit;border-radius:4px;cursor:pointer;font-weight:bold;}
+button.submit:hover{opacity:.85;}button.submit:disabled{opacity:.5;cursor:not-allowed;}
+
+/* ── Document output ── */
+div.document{padding:1em 2em;line-height:1.6;}
+div.tawala-doc{padding:1.2em 2em;line-height:1.6;}
+div.tawala-doc p{margin-bottom:.6em;}
+
+/* ── Report form ── */
+div.reportView{padding:1.2em 2.5em 2em;}
+div.reportView h2{font-size:18px;font-weight:bold;color:#7B4500;border-bottom:2px solid #7B4500;padding-bottom:.3em;margin:.5em 0 .9em;}
+div.reportContent{font-size:13px;line-height:1.6;}
+.tally-block{margin-bottom:1.4em;}
+.tally-question{font-weight:bold;margin-bottom:.5em;color:#3c3c3c;}
+.tally-bar-row{display:flex;align-items:center;margin-bottom:.35em;gap:.5em;}
+.tally-bar-label{min-width:160px;max-width:220px;font-size:.92em;color:#444;text-align:right;padding-right:.4em;flex-shrink:0;}
+.tally-bar-track{flex:1;background:#e0d8cf;border-radius:2px;height:16px;overflow:hidden;}
+.tally-bar-fill{background:#7B4500;height:100%;border-radius:2px;transition:width .3s;}
+.tally-bar-count{font-size:.88em;color:#555;min-width:2.5em;}
+.tally-total{font-size:.85em;color:#777;margin-top:.3em;}
+.record-list{margin-top:.5em;border-collapse:collapse;width:100%;}
+.record-list th{background:#7B4500;color:#fff;padding:.35em .7em;text-align:left;font-weight:normal;font-size:.9em;}
+.record-list td{padding:.3em .7em;border-bottom:1px solid #ddd;font-size:.9em;}
+.record-list tr:nth-child(even) td{background:#f9f6f0;}
+.report-meta{font-size:.82em;color:#888;margin-bottom:1em;}
+
+/* ── Loading ── */
+#loadingOverlay{display:flex;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:999;align-items:center;justify-content:center;}
+.spinner{width:44px;height:44px;border:5px solid #fff;border-top-color:#7B4500;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── Confirmation / done ── */
+div.doneView{padding:2em 2.5em;text-align:center;}
+div.doneView h2{font-size:22px;color:#7B4500;margin-bottom:.6em;}
+div.doneView p{font-size:14px;color:#555;margin-bottom:1em;}
+div.doneView a{color:#7B4500;font-weight:bold;}
+</style>
+</head>
+<body>
+<div id="outerContainer"><div id="tawalaProjectContainer">
+  <h1 class="pageHeading" id="pageTitle">Tawala</h1>
+  <div id="errormsg"></div>
+  <div id="appContent"></div>
+  <div id="innerTawalaFooter">
+    <span>Powered by Tawala</span>
+    <a href="library.html">Library</a>
+  </div>
+</div></div>
+<div id="loadingOverlay"><div class="spinner"></div></div>
+
+<script>
+// ── Config ─────────────────────────────────────────────────────────────────
+var RUNTIME = "https://superagent-3398ca67.base44.app/functions/tawalaRuntime";
+
+// Derive projectId and linkId from the URL query string
+// Expected: runner.html?p=<projectId>   (linkId auto-generated per session)
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  window.projectId = params.get("p") || "";
+  window.linkId    = params.get("l") || ("lnk-" + Math.random().toString(36).slice(2, 10));
+  if (!window.projectId) {
+    document.getElementById("appContent").innerHTML =
+      '<div style="padding:2em;color:#c00">No project specified. '
+      + '<a href="library.html" style="color:#7B4500">Go to the Library</a></div>';
+    document.getElementById("loadingOverlay").style.display = "none";
+  }
+})();
+
+// ── Utilities ───────────────────────────────────────────────────────────────
+function escH(s) { return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function bsz(l) { return l<=8?"small":l<=24?"medium":"large"; }
+function showOverlay()  { document.getElementById("loadingOverlay").style.display="flex"; }
+function hideOverlay()  { document.getElementById("loadingOverlay").style.display="none"; }
+function showErr(msg)   { var e=document.getElementById("errormsg"); e.innerHTML=msg; e.classList.toggle("show",!!msg); }
+
+// ── FIB prompt parser ───────────────────────────────────────────────────────
+function parseFibPrompt(prompt, blanks) {
+  var segs=[], cur="", i=0, s=prompt||"";
+  while(i<s.length){
+    if(s[i]==="["){var j=s.indexOf("]",i+1);cur+=s.slice(i,j+1);i=j+1;}
+    else if(s[i]==="("){var j=s.indexOf(")",i+1);cur+=s.slice(i,j+1);i=j+1;}
+    else if(s[i]==="/"){segs.push(cur);cur="";i+=(s[i+1]==="/"?2:1);}
+    else{cur+=s[i++];}
+  }
+  segs.push(cur);
+  segs=segs.map(function(x){return x.trim();}).filter(Boolean);
+  var segWants=segs.map(function(seg){var c=(seg.match(/\[[^\]]*\]/g)||[]);return c.length>0?c.length:1;});
+  var extra=blanks.length-segWants.reduce(function(a,b){return a+b;},0);
+  if(extra>0)segWants[segWants.length-1]+=extra;
+  var rows=[],bi=0;
+  for(var si=0;si<segs.length;si++){
+    var seg=segs[si],n=segWants[si];
+    var cols=(seg.match(/\[[^\]]*\]/g)||[]).map(function(c){return c.slice(1,-1);});
+    var noCol=seg.replace(/\[[^\]]*\]/g,"");
+    var lastColon=noCol.lastIndexOf(":");
+    var parenIdx=noCol.indexOf("(");
+    var hint="",rowLabelRaw;
+    if(parenIdx>=0&&(lastColon<0||parenIdx>lastColon)){
+      var hm=noCol.match(/\(([^)]*)\)/);hint=hm?hm[1]:"";
+      rowLabelRaw=noCol.replace(/\([^)]*\)/g,"").trim().replace(/:$/,"").trim();
+    } else {rowLabelRaw=noCol.trim().replace(/:$/,"").trim();}
+    var rowLabel=rowLabelRaw.split(":").pop().trim();
+    var blankDefs=[];
+    for(var k=0;k<n&&bi<blanks.length;k++,bi++){
+      blankDefs.push({name:blanks[bi].name,colLabel:cols[k]||"",length:blanks[bi].length||20});
+    }
+    rows.push({rowLabel:rowLabel,hint:hint,blankDefs:blankDefs});
+  }
+  return rows;
+}
+
+// ── Renderers ───────────────────────────────────────────────────────────────
+function renderFib(item, vals, pfx) {
+  var style=item.style||"", blanks=item.blanks||[], prompt=item.prompt||"";
+  var hasStructure=prompt.indexOf("/")>=0||prompt.indexOf("[")>=0||prompt.indexOf(":")>=0;
+  var useTable=style.indexOf("Align")>=0||(hasStructure&&style!=="topLabels");
+  var align=style.indexOf("right")>=0?"right":"left";
+  if(useTable){
+    var rows=parseFibPrompt(prompt,blanks);
+    return '<table class="fib"><tbody>'+rows.map(function(row){
+      var blanksHtml=row.blankDefs.map(function(bd){
+        var val=vals[pfx+bd.name]||vals[bd.name]||"";
+        var colLbl=bd.colLabel?'<div style="font-size:.8em;color:#555;text-align:center">'+escH(bd.colLabel)+"</div>":"";
+        return '<span style="display:inline-block;margin-right:.4em;vertical-align:top">'+colLbl+'<input class="text '+bsz(bd.length)+'" type="text" name="'+escH(pfx+bd.name)+'" value="'+escH(val)+'"></span>';
+      }).join("");
+      var hintHtml=row.hint?'&nbsp;<span style="font-size:.85em;color:#666">('+escH(row.hint)+")</span>":"";
+      return '<tr><td class="label '+align+'">'+escH(row.rowLabel)+"</td><td>"+blanksHtml+hintHtml+"</td></tr>";
+    }).join("")+"</tbody></table>";
+  }
+  return '<div class="fib">'+blanks.map(function(b){
+    var lbl=b.colLabel?'<div style="font-size:.8em;color:#555;text-align:center">'+escH(b.colLabel)+"</div>":"";
+    var val=vals[pfx+b.name]||vals[b.name]||"";
+    return '<span style="display:inline-block;margin-right:.5em;vertical-align:top">'+lbl+'<input class="text '+bsz(b.length||20)+'" type="text" name="'+escH(pfx+b.name)+'" value="'+escH(val)+'"></span>';
+  }).join("")+"</div>";
+}
+
+function renderMc(item, vals, pfx) {
+  var nm=item.name||item.label, key=pfx+nm;
+  var cur=(vals[key]||vals[nm]||"").split(",").map(function(s){return s.trim();});
+  var itype=(item.displayAs==="checkbox"||!item.onlyone)?"checkbox":"radio";
+  var dcls=itype==="radio"?"mcRadio":"mcCheckbox";
+  var q=item.question?'<label class="question">'+escH(item.question)+"</label>":"";
+  var choices=item.choices||[];
+  var hasDynamic=choices.some(function(c){return c.type==="dynamic";});
+  var resolvedChoices;
+  if(hasDynamic){
+    resolvedChoices=item._dynamicChoices||[];
+    if(!resolvedChoices.length){
+      return '<div class="'+dcls+' dynamicMc" data-item-label="'+escH(item.label)+'">'+q+'<span class="dynamicChoicesLoading">Loading options…</span></div>';
+    }
+  } else { resolvedChoices=choices; }
+  var ans=resolvedChoices.map(function(c){
+    var chk=cur.indexOf(String(c.label))>=0?" checked":"";
+    return '<span class="answer"><input type="'+itype+'" name="'+escH(key)+'" value="'+escH(c.label)+'"'+chk+'><label>'+escH(c.text)+"</label></span>";
+  }).join("");
+  return '<div class="'+dcls+'">'+q+ans+"</div>";
+}
+
+// Build _mcqChoices lookup for the current form's static choices
+function indexMcqChoices(formItems) {
+  window._mcqChoices = window._mcqChoices || {};
+  (formItems||[]).forEach(function(item){
+    if(item.type==="mc"&&item.name){
+      var map={};
+      (item.choices||[]).forEach(function(c){if(c.label&&c.text)map[c.label]=c.text;});
+      window._mcqChoices[item.name]=map;
+    }
+  });
+}
+
+function renderItem(item, vals, fname) {
+  var pfx=fname+":", content=item.content||"", style=item.style||"normal";
+  if(item.type==="field"||item.type==="skipInstructions"||item.type==="skip")return "";
+  if(item.type==="fib") return '<div class="textItem">'+renderFib(item,vals,pfx)+"</div>";
+  if(item.type==="mc")  return '<div class="textItem">'+renderMc(item,vals,pfx)+"</div>";
+  if(!content)return "";
+  if(item.type==="heading"||item.type==="headingitem") return '<h2 class="text heading">'+escH(content)+"</h2>";
+  if(item.type==="subheading"||item.type==="subheadingitem") return '<h3 class="text subheading">'+escH(content)+"</h3>";
+  return '<div class="text '+escH(style)+'">'+escH(content)+"</div>";
+}
+
+// ── Form builder ─────────────────────────────────────────────────────────────
+function buildFormHtml(form, vals) {
+  indexMcqChoices(form.items);
+  // Detect report form: no fib/mc items, has text with Record: references
+  var hasInput=(form.items||[]).some(function(it){return it.type==="fib"||it.type==="mc";});
+  var hasRecordRef=(form.items||[]).some(function(it){
+    return it.type==="text"&&it.content&&it.content.indexOf("Record:")>=0;
+  });
+  if(!hasInput&&hasRecordRef) return buildReportFormHtml(form);
+
+  // ── Standard input form ──
+  // Split items into page segments at skip3 label (multi-page) or instructional text
+  var pages=[{items:[]}];
+  (form.items||[]).forEach(function(item){
+    if(item.label==="skip3"||item.label==="skip4"){
+      pages.push({items:[]});
+    } else if(item.type==="text"&&item.style==="instructional"&&item.content&&pages[pages.length-1].items.some(function(i){return i.type==="fib"||i.type==="mc";})){
+      pages[pages.length-1].items.push(item);
+      pages.push({items:[]});
+    } else {
+      pages[pages.length-1].items.push(item);
+    }
+  });
+  // Remove empty trailing pages
+  while(pages.length>1&&!pages[pages.length-1].items.length) pages.pop();
+
+  var html='<input type="hidden" id="hPid" value="'+escH(window.projectId)+'">'
+          +'<input type="hidden" id="hLid" value="'+escH(window.linkId)+'">'
+          +'<input type="hidden" id="hFname" value="'+escH(form.name)+'">';
+
+  pages.forEach(function(page, pageIdx){
+    var pageItems=page.items.filter(function(it){return it.type!=="skipInstructions"&&it.type!=="skip";});
+    var pageHtml=pageItems.map(function(it){return renderItem(it,vals,form.name);}).filter(Boolean).join("\n");
+    pageHtml+='<div class="submitRow"><button id="submitBtn" class="submit" type="button">Submit &#x2192;</button></div>';
+    if(pageIdx===0){
+      html+='<div id="formPage0">'+pageHtml+"</div>";
+    } else {
+      html+='<div id="formPage'+pageIdx+'" style="display:none">'+pageHtml+"</div>";
+    }
+  });
+  return html;
+}
+
+// ── Report form renderer ──────────────────────────────────────────────────────
+// Called when the runtime says showForm but the form has no input items and
+// has Record: references in its text content.
+// We fetch aggregated submission data ourselves and render it.
+function buildReportFormHtml(form) {
+  return '<div class="reportView" id="reportViewEl">'
+        +'<div class="reportContent" id="reportContent"><div style="padding:1em;color:#888">Loading results…</div></div>'
+        +'</div>';
+}
+
+// Resolve "Record:FormName:FieldName" references in text content.
+// For MC fields: show a bar chart of choice counts.
+// For FIB fields: show a plain list of values.
+function resolveReportContent(content, submissions, formDef) {
+  if(!content) return "";
+  // Find all Record: tokens in the content
+  var tokens=[], remaining=content;
+  var parts=content.split(/(Record:[A-Za-z0-9 _]+:[A-Za-z0-9_]+)/g);
+  var html="";
+  parts.forEach(function(part){
+    var m=part.match(/^Record:([A-Za-z0-9 _]+):([A-Za-z0-9_]+)$/);
+    if(!m){ html+=escH(part); return; }
+    var fieldName=m[2];
+    // Determine field type from formDef
+    var fieldItem=null;
+    if(formDef){
+      (formDef.items||[]).forEach(function(it){
+        if((it.name===fieldName||it.label===fieldName)||(it.blanks||[]).some(function(b){return b.name===fieldName;})){
+          fieldItem=it;
+        }
+      });
+    }
+    var isMc=fieldItem&&fieldItem.type==="mc";
+    if(isMc){
+      html+=renderMcTally(fieldItem, submissions, fieldName);
+    } else {
+      html+=renderFibList(submissions, fieldName);
+    }
+  });
+  return html||escH(content);
+}
+
+function renderMcTally(item, submissions, fieldName) {
+  var counts={}, total=0;
+  var choices=item.choices||[];
+  choices.forEach(function(c){counts[c.label]=0;});
+  submissions.forEach(function(sub){
+    var val=(sub[fieldName]||sub[item.name]||"");
+    val.split(",").map(function(s){return s.trim();}).filter(Boolean).forEach(function(v){
+      if(counts[v]!==undefined) counts[v]++;
+      else counts[v]=1;
+      total++;
+    });
+  });
+  var max=Math.max.apply(null,choices.map(function(c){return counts[c.label]||0;}));
+  var html='<div class="tally-block">';
+  if(item.question) html+='<div class="tally-question">'+escH(item.question)+"</div>";
+  choices.forEach(function(c){
+    var n=counts[c.label]||0;
+    var pct=max>0?Math.round(n/max*100):0;
+    html+='<div class="tally-bar-row">'
+      +'<div class="tally-bar-label">'+escH(c.text)+"</div>"
+      +'<div class="tally-bar-track"><div class="tally-bar-fill" style="width:'+pct+'%"></div></div>'
+      +'<div class="tally-bar-count">'+n+"</div>"
+      +"</div>";
+  });
+  html+='<div class="tally-total">'+total+" response"+(total!==1?"s":"")+"</div>";
+  html+="</div>";
+  return html;
+}
+
+function renderFibList(submissions, fieldName) {
+  var vals=submissions.map(function(s){return s[fieldName]||"";}).filter(Boolean);
+  if(!vals.length) return '<p style="color:#888;font-size:.9em">No responses yet.</p>';
+  return '<table class="record-list"><thead><tr><th>'+escH(fieldName)+"</th></tr></thead><tbody>"
+    +vals.map(function(v){return "<tr><td>"+escH(v)+"</td></tr>";}).join("")
+    +"</tbody></table>";
+}
+
+// After rendering the report shell, fetch submissions and populate it
+function populateReport(form, surveyFormName) {
+  fetch(RUNTIME, {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      action:"getSubmissions",
+      projectId: window.projectId,
+      linkId: window.linkId,
+      formName: surveyFormName
+    })
+  }).then(function(r){return r.json();}).then(function(data){
+    var subs=data.submissions||[];
+    var totalCount=subs.length;
+    var el=document.getElementById("reportContent");
+    if(!el)return;
+    // Find the source form definition from saved state
+    var srcFormDef=window._sourceFormDef||null;
+    // Build content from the report form's text items
+    var html='<div class="report-meta">'+totalCount+" response"+(totalCount!==1?"s":"")+" recorded.</div>";
+    (form.items||[]).forEach(function(item){
+      if(item.type==="text"&&item.content){
+        html+=resolveReportContent(item.content, subs, srcFormDef);
+      } else if(item.type==="heading"||item.type==="headingitem"){
+        html+='<h2>'+escH(item.content||"")+"</h2>";
+      }
+    });
+    el.innerHTML=html;
+  }).catch(function(err){
+    var el=document.getElementById("reportContent");
+    if(el) el.innerHTML='<p style="color:red">Could not load results: '+escH(err.message)+"</p>";
+  });
+}
+
+// ── Show form / doc / done ───────────────────────────────────────────────────
+function showForm(form, vals) {
+  vals=vals||{};
+  // Update page title
+  document.getElementById("pageTitle").textContent=window._projectName||form.name;
+  var html=buildFormHtml(form,vals);
+  document.getElementById("appContent").innerHTML='<form id="tawalaForm" onsubmit="return false;">'+html+"</form>";
+  showErr("");
+
+  // If report form: kick off the async population
+  var reportEl=document.getElementById("reportViewEl");
+  if(reportEl){
+    // Guess the source form name: assume it's the first form (Survey)
+    populateReport(form, window._surveyFormName||"Survey");
+    return;
+  }
+
+  // Fetch dynamic choices if any
+  (form.items||[]).forEach(function(item){
+    if(item.type==="mc"&&(item.choices||[]).some(function(c){return c.type==="dynamic";})){
+      fetchDynamicChoices(item, vals, form.name);
+    }
+  });
+
+  // Wire submit button(s)
+  document.querySelectorAll("button.submit").forEach(function(btn){
+    btn.onclick=function(){doSubmit();return false;};
+  });
+}
+
+function showDoc(html) {
+  document.getElementById("appContent").innerHTML='<div class="document">'+html+"</div>";
+}
+
+function showDone(msg) {
+  document.getElementById("appContent").innerHTML=
+    '<div class="doneView">'
+    +'<h2>&#x2713; Submitted</h2>'
+    +'<p>'+(msg||"Your response has been recorded. Thank you!")+"</p>"
+    +'<p><a href="library.html">Return to the Library</a></p>'
+    +"</div>";
+}
+
+// ── Dynamic choices ──────────────────────────────────────────────────────────
+function fetchDynamicChoices(item, vals, fname) {
+  var dynChoice=item.choices.find(function(c){return c.type==="dynamic";});
+  if(!dynChoice)return;
+  fetch(RUNTIME,{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({action:"getDynamicChoices",projectId:window.projectId,linkId:window.linkId,
+      sourceForm:dynChoice.sourceForm,displayExpr:dynChoice.displayExpr,valueExpr:dynChoice.valueExpr})
+  }).then(function(r){return r.json();}).then(function(data){
+    item._dynamicChoices=data.choices||[];
+    if(window._mcqChoices){
+      var map={};
+      (item._dynamicChoices).forEach(function(c){if(c.label&&c.text)map[c.label]=c.text;});
+      window._mcqChoices[item.name||item.label]=map;
+    }
+    var mergedVals=Object.assign({},vals,window._savedFields||{});
+    var container=document.querySelector(".dynamicMc[data-item-label='"+item.label+"']");
+    if(!container)return;
+    var tmp=document.createElement("div");
+    tmp.innerHTML=renderMc(item,mergedVals,fname+":");
+    container.parentNode.replaceChild(tmp.firstChild,container);
+  }).catch(function(){});
+}
+
+// ── Submit ────────────────────────────────────────────────────────────────────
+function doSubmit() {
+  var btn=document.getElementById("submitBtn");
+  if(btn)btn.disabled=true;
+  showErr(""); showOverlay();
+
+  var pid=(document.getElementById("hPid")||{}).value||window.projectId;
+  var lid=(document.getElementById("hLid")||{}).value||window.linkId;
+  var fname=(document.getElementById("hFname")||{}).value||"";
+
+  // Collect all form fields
+  var fields={};
+  var formEl=document.getElementById("tawalaForm");
+  if(formEl){
+    var cbSeen={};
+    formEl.querySelectorAll("input,textarea,select").forEach(function(el){
+      var n=el.name; if(!n)return;
+      if(el.type==="checkbox"){
+        if(!cbSeen[n]){fields[n]="";cbSeen[n]=true;}
+        if(el.checked)fields[n]=fields[n]?fields[n]+","+el.value:el.value;
+      } else if(el.type==="radio"){
+        if(el.checked)fields[n]=el.value;
+      } else { fields[n]=el.value; }
+    });
+  }
+  // Merge saved fields from prior pages
+  if(window._savedFields) Object.assign(fields,Object.fromEntries(
+    Object.entries(window._savedFields).filter(function(e){return !fields[e[0]];})));
+
+  // Check for unrevealed pages (multi-page form)
+  var nextPage=null;
+  for(var pi=1;pi<=10;pi++){
+    var pg=document.getElementById("formPage"+pi);
+    if(pg&&!pg.getAttribute("data-revealed")){nextPage=pg;break;}
+  }
+
+  if(nextPage){
+    // Save page data and reveal next page (client-side page advance)
+    fetch(RUNTIME,{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({action:"submitForm",projectId:pid,linkId:lid,formName:fname,fields:fields})
+    }).then(function(r){return r.json();}).then(function(data){
+      hideOverlay();
+      if(data.action==="validationError"){showErr((data.errors||[]).join("<br>"));if(btn)btn.disabled=false;return;}
+      if(data.error){showErr(data.error);if(btn)btn.disabled=false;return;}
+      if(!window._savedFields)window._savedFields={};
+      Object.assign(window._savedFields,fields);
+      // Hide current visible page, show next
+      var prevRevealed=document.querySelector(".formPage[data-revealed], #formPage0");
+      document.querySelectorAll("[id^=formPage]").forEach(function(el){el.style.display="none";});
+      nextPage.style.display="";
+      nextPage.setAttribute("data-revealed","true");
+      // Wire submit in the newly revealed page
+      nextPage.querySelectorAll("button.submit").forEach(function(b){
+        b.disabled=false; b.onclick=function(){doSubmit();return false;};
+      });
+      window.scrollTo(0,0);
+    }).catch(function(err){hideOverlay();showErr("Network error: "+err.message);if(btn)btn.disabled=false;});
+    return;
+  }
+
+  // Final submit — send to runtime
+  fetch(RUNTIME,{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({action:"submitForm",projectId:pid,linkId:lid,formName:fname,fields:fields})
+  }).then(function(r){return r.json();}).then(function(data){
+    hideOverlay();
+    if(data.action==="showForm"){
+      window._savedFields={};
+      showForm(data.form, data.currentValues||{});
+      return;
+    }
+    if(data.action==="showDocument"){showDoc(data.html);return;}
+    if(data.action==="redirect"){window.location.href=data.url;return;}
+    if(data.action==="validationError"){showErr((data.errors||[]).join("<br>"));if(btn)btn.disabled=false;return;}
+    if(data.action==="done"){showDone();return;}
+    if(data.error){showErr(data.error);if(btn)btn.disabled=false;return;}
+    showErr("Unexpected response: "+escH(JSON.stringify(data).slice(0,200)));
+    if(btn)btn.disabled=false;
+  }).catch(function(err){hideOverlay();showErr("Network error: "+err.message);if(btn)btn.disabled=false;});
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+if(window.projectId){
+  showOverlay();
+  fetch(RUNTIME,{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({action:"submitForm",projectId:window.projectId,linkId:window.linkId,formName:"",fields:{}})
+  }).then(function(r){return r.json();}).then(function(data){
+    hideOverlay();
+    if(data.projectName){
+      window._projectName=data.projectName;
+      document.getElementById("pageTitle").textContent=data.projectName;
+      document.title=data.projectName+" | Tawala";
+    }
+    if(data.action==="showForm"){
+      // Remember the first form name as the survey source for any report form
+      window._surveyFormName=data.formName;
+      window._sourceFormDef=data.form;
+      showForm(data.form,data.currentValues||{});
+    } else if(data.action==="showDocument"){showDoc(data.html);}
+    else { document.getElementById("appContent").innerHTML='<div style="padding:2em;color:#c00">'+escH(JSON.stringify(data))+"</div>"; }
+  }).catch(function(err){
+    hideOverlay();
+    document.getElementById("appContent").innerHTML=
+      '<div style="padding:2em;color:red">Failed to connect: '+escH(err.message)
+      +'<br><br><button onclick="location.reload()" style="margin-top:.5em">Retry</button></div>';
+  });
+}
+</script>
+</body></html>
