@@ -457,6 +457,21 @@ function showForm(form, vals) {
     }
   });
 
+  // Build per-page skip label sequence from form items
+  // skipInstructions items appear AFTER each page's content in the definition
+  // We collect them in order: skip2 = page1 validator, skip3 = page2, skip4 = page3, etc.
+  var skipLabels = [];
+  (form.items||[]).forEach(function(it){
+    if(it.type==="skipInstructions" && it.label && it.label !== "skip1") {
+      skipLabels.push(it.label);
+    }
+  });
+  // skipLabels[0] = used when submitting page 1, [1] = page 2, etc.
+  window._skipLabels = skipLabels;
+  window._currentPageIndex = 0;
+  window._currentSkipLabel = skipLabels[0] || null;
+  window._nextSkipLabel = skipLabels[1] || null;
+
   // Wire submit button(s)
   document.querySelectorAll("button.submit").forEach(function(btn){
     btn.onclick=function(){doSubmit();return false;};
@@ -540,13 +555,19 @@ function doSubmit() {
     // Save page data and reveal next page (client-side page advance)
     fetch(RUNTIME,{
       method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({action:"submitForm",projectId:pid,linkId:lid,formName:fname,fields:fields})
+      body:JSON.stringify({action:"submitForm",projectId:pid,linkId:lid,formName:fname,fields:fields,skipLabel:window._currentSkipLabel||null})
     }).then(function(r){return r.json();}).then(function(data){
       hideOverlay();
       if(data.action==="validationError"){showErr((data.errors||[]).join("<br>"));if(btn)btn.disabled=false;return;}
       if(data.error){showErr(data.error);if(btn)btn.disabled=false;return;}
       if(!window._savedFields)window._savedFields={};
       Object.assign(window._savedFields,fields);
+      // Advance skip label for next page
+      window._currentPageIndex = (window._currentPageIndex || 0) + 1;
+      var pi = window._currentPageIndex;
+      var sl = window._skipLabels || [];
+      window._currentSkipLabel = sl[pi] || null;
+      window._nextSkipLabel = sl[pi+1] || null;
       // Hide current visible page, show next
       var prevRevealed=document.querySelector(".formPage[data-revealed], #formPage0");
       document.querySelectorAll("[id^=formPage]").forEach(function(el){el.style.display="none";});
@@ -569,7 +590,7 @@ function doSubmit() {
   // Final submit — send to runtime
   fetch(RUNTIME,{
     method:"POST",headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({action:"submitForm",projectId:pid,linkId:lid,formName:fname,fields:fields})
+    body:JSON.stringify({action:"submitForm",projectId:pid,linkId:lid,formName:fname,fields:fields,skipLabel:window._currentSkipLabel||null})
   }).then(function(r){return r.json();}).then(function(data){
     hideOverlay();
     if(data.action==="showForm"){
